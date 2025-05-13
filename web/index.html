@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+</head>
+
+<body>
+    <table id="data-table">
+        <tr>
+            <td>Index</td>
+            <td>File name</td>
+        </tr>
+    </table>
+
+    <script>
+        function fetcheData() {
+            fetch('/files/')
+                .then(response => response.json())
+                .then(data => loadTable(data.files))
+                .catch(error => console.error(error));
+        }
+
+        function loadTable(data) {
+            const table = document.getElementById("data-table")
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const indexCell = document.createElement('td');
+                indexCell.textContent = index + 1;
+                const nameCell = document.createElement('td');
+                
+                const link = document.createElement('a');
+                link.href = "/files/"+item;
+                link.textContent = item;
+                nameCell.appendChild(link);
+                
+                row.appendChild(indexCell);
+                row.appendChild(nameCell);
+                table.appendChild(row);
+            });
+        }
+
+        fetcheData();
+    </script>
+
+</body>
+
+</html>
