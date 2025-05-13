@@ -1,13 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    <link rel="stylesheet" href="styles/styles.css">
     <title>File Upload</title>
 </head>
+
 <body>
-    <h2>File Upload</h2>
-    <form action="/files" method="post" enctype="multipart/form-data">
-        <input type="file" name="uploadFile">
-        <input type="submit" value="Upload">
-    </form>
+    <div class="upload-container">
+        <div class="upload-form-container">
+            <h2>File Upload</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="uploadFile">
+                <input type="submit" value="Upload">
+            </form>
+            <a href="/">go to home</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const file = formData.get('uploadFile');
+
+            // Create new FormData with the correct field name
+            const uploadData = new FormData();
+            uploadData.append('uploadFile', file);
+
+            fetch('/files', {
+                method: 'POST',
+                body: uploadData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Upload successful:', data);
+                alert('File uploaded successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Upload failed!');
+            });
+        });
+    </script>
+
 </body>
+
 </html>

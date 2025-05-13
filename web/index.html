@@ -4,18 +4,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/styles.css">
     <title>Files</title>
 </head>
 
 <body>
+
+    <div class="hero" style="text-align: center; padding: 15px;">
+        <h1>FileShear</h1>
+        <a href="/upload">uploadFile</a>
+    </div>
+
     <table id="data-table">
         <tr>
             <td>Index</td>
             <td>File name</td>
+            <td>View</td>
         </tr>
     </table>
 
+    <div class="preview-dialog">
+        <div class="preview-dialog-content" id="preview-content">
+            <!-- Preview content will be injected here -->
+        </div>
+    </div>
+
     <script>
+        // Show dialog when preview content is set
+        function handleViewButton(fileName) {
+            const previewDialog = document.getElementsByClassName("preview-dialog")[0];
+            const previewContent = document.getElementById("preview-content");
+            const fileUrl = "/files/" + fileName;
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+            let content = "";
+
+            if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(fileExtension)) {
+                content = `<img src="${fileUrl}" alt="${fileName}" style="max-width:100%;max-height:80vh;">`;
+            } else if (["mp4", "webm", "ogg", "mkv"].includes(fileExtension)) {
+                // Map file extensions to correct MIME types
+                const videoMimeTypes = {
+                    mp4: "video/mp4",
+                    webm: "video/webm",
+                    ogg: "video/ogg",
+                    mkv: "video/webm" // mkv is not widely supported, using webm as fallback
+                };
+                const mimeType = videoMimeTypes[fileExtension] || "video/mp4";
+                content = `<video controls style="max-width:100%;max-height:80vh;">
+                              <source src="${fileUrl}" type="${mimeType}">
+                              Your browser does not support the video tag.
+                           </video>`;
+            } else {
+                content = `<p>Preview not available for this file type.</p>`;
+            }
+
+            previewContent.innerHTML = content + `<button style="margin-top:16px;padding:8px 16px;cursor:pointer;" onclick="document.getElementsByClassName('preview-dialog')[0].style.display='none'">Close</button>`;
+            previewDialog.style.display = "flex";
+        }
         function fetcheData() {
             fetch('/files/')
                 .then(response => response.json())
@@ -30,14 +74,25 @@
                 const indexCell = document.createElement('td');
                 indexCell.textContent = index + 1;
                 const nameCell = document.createElement('td');
-                
+                const viewCell = document.createElement('td');
+
                 const link = document.createElement('a');
-                link.href = "/files/"+item;
+                link.href = "/files/" + item;
                 link.textContent = item;
                 nameCell.appendChild(link);
-                
+
+                // view button
+                const viewButton = document.createElement('button');
+                viewButton.textContent = "view";
+                viewButton.className = "view-button";
+                viewButton.style.cursor = "pointer";
+                viewButton.onclick = () => handleViewButton(item);
+                viewCell.appendChild(viewButton);
+
                 row.appendChild(indexCell);
                 row.appendChild(nameCell);
+                row.appendChild(viewCell);
+
                 table.appendChild(row);
             });
         }

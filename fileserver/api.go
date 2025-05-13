@@ -14,14 +14,8 @@ func getMainPage(c *gin.Context) {
 	})
 }
 
-func getUploadPage(c *gin.Context){
+func getUploadPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "upload.html", gin.H{
-		"title": "File Shaar",
-	})
-}
-
-func getVideoPlayer(c *gin.Context) {
-	c.HTML(http.StatusOK, "video-player.html", gin.H{
 		"title": "File Shaar",
 	})
 }
@@ -130,7 +124,11 @@ func API(LanIp string) {
 	router := gin.Default()
 
 	// Load HTML templates
-	router.LoadHTMLGlob("web/*")
+	router.LoadHTMLGlob("web/*.html")
+
+	// serve static files
+	router.Static("/scripts", "web/scripts")
+	router.Static("/styles", "web/styles")
 
 	router.GET("/", getMainPage)
 	router.GET("/upload", getUploadPage)
@@ -139,8 +137,6 @@ func API(LanIp string) {
 	router.GET("/files", getFiles)
 
 	router.GET("/files/:filename", getFileByName)
-	// video player
-	router.GET("/video-player", getVideoPlayer)
 
 	// upload file
 	router.POST("/files", uploadFile)
