@@ -137,12 +137,15 @@ func API(LanIp string) {
 
 	router := gin.Default()
 
+    // Use absolute path for templates and static files
+    webDir := "/usr/local/share/fileshear/web"
+
 	// Load HTML templates
-	router.LoadHTMLGlob("web/*.html")
+	router.LoadHTMLGlob(filepath.Join(webDir, "*.html"))
 
 	// serve static files
-	router.Static("/scripts", "web/scripts")
-	router.Static("/styles", "web/styles")
+	router.Static("/scripts", filepath.Join(webDir, "scripts"))
+	router.Static("/styles", filepath.Join(webDir, "styles"))
 
 	router.GET("/", getMainPage)
 	router.GET("/upload", getUploadPage)
