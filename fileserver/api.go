@@ -8,6 +8,15 @@ import (
 	"path/filepath"
 )
 
+// Get current working directory
+func getCurrentDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	return dir
+}
+
 func getMainPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "File Shaar",
@@ -21,38 +30,49 @@ func getUploadPage(c *gin.Context) {
 }
 
 func getFiles(c *gin.Context) {
-	// read the contents of the files dir
-	files, err := os.ReadDir("files")
+	currentDir := getCurrentDir()
+
+	// read the contents of the current dir
+	files, err := os.ReadDir(currentDir)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to read files directory",
+			"message": "Failed to read directory",
 			"error":   err.Error(),
 		})
 		return
 	}
 
 	// Create a slice to store filenames
-	var fileNames []string
+	var fileList []map[string]interface{}
 
-	// collect all filenames
+	// collect all file information
 	for _, file := range files {
 		if !file.IsDir() { // only include files, not dirs
-			fileNames = append(fileNames, file.Name())
+			info, err := file.Info()
+			if err != nil {
+				continue
+			}
+			fileList = append(fileList, map[string]interface{}{
+				"name":     file.Name(),
+				"size":     info.Size(),
+				"modified": info.ModTime(),
+			})
 		}
 	}
 
 	// return the filenames as JSON
 	c.JSON(http.StatusOK, gin.H{
-		"files": fileNames,
+		"files": fileList,
 	})
 
 }
 
 func getFileByName(c *gin.Context) {
 	fileName := c.Param("filename")
+	currentDir := getCurrentDir()
 
 	// construct file path
-	filePath := filepath.Join("files", fileName)
+	filePath := filepath.Join(currentDir, fileName)
 
 	// check if the file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -68,6 +88,7 @@ func getFileByName(c *gin.Context) {
 
 // upload file
 func uploadFile(c *gin.Context) {
+	currentDir := getCurrentDir()
 	// Set a reasonable max file size (e.g., 32 MB)
 	c.Request.ParseMultipartForm(32 << 20)
 
@@ -83,16 +104,8 @@ func uploadFile(c *gin.Context) {
 	defer file.Close()
 
 	// Ensure the files directory exists
-	if err := os.MkdirAll("files", 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create upload directory",
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	// Create the destination file
-	dst := filepath.Join("files", header.Filename)
+	// Create the destination file in current directory
+	dst := filepath.Join(currentDir, header.Filename)
 	out, err := os.Create(dst)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -117,6 +130,7 @@ func uploadFile(c *gin.Context) {
 		"message":  "File uploaded successfully",
 		"filename": header.Filename,
 	})
+
 }
 
 func API(LanIp string) {
