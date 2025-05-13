@@ -77,8 +77,8 @@
                 const viewCell = document.createElement('td');
 
                 const link = document.createElement('a');
-                link.href = "/files/" + item;
-                link.textContent = item;
+                link.href = "/files/" + item.name;
+                link.textContent = item.name;
                 nameCell.appendChild(link);
 
                 // view button
@@ -86,7 +86,7 @@
                 viewButton.textContent = "view";
                 viewButton.className = "view-button";
                 viewButton.style.cursor = "pointer";
-                viewButton.onclick = () => handleViewButton(item);
+                viewButton.onclick = () => handleViewButton(item.name);
                 viewCell.appendChild(viewButton);
 
                 row.appendChild(indexCell);
