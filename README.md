@@ -25,22 +25,20 @@ go build
 ### Usage
 
 ```bash
-./fileshear [options]
+./fileshear
 ```
 
 Example:
 
 ```bash
-./fileshear --send /path/to/file --to 192.168.1.2
+./fileshear
 ```
 
 ## Project Structure
 
 ```
 fileshear/
-├── cmd/         # CLI commands
 ├── internal/    # Internal packages
-├── pkg/         # Public packages
 ├── README.md
 └── main.go
 ```
@@ -53,6 +51,5 @@ fileshear/
 4. Push to the branch (`git push origin feature/foo`)
 5. Open a pull request
 
-## License
-
-This project is licensed under the MIT License.
+## Future Updates
+- Allow to send options through the CLI
