@@ -16,6 +16,8 @@ Fileshear is a Go-based project for efficient file sharing and management.
 
 ### Installation
 
+run `install.sh` or
+
 ```bash
 git clone https://github.com/yourusername/fileshear.git
 cd fileshear
@@ -52,4 +54,4 @@ fileshear/
 5. Open a pull request
 
 ## Future Updates
-- Allow to send options through the CLI
+- new look and feel
