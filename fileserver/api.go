@@ -1,6 +1,7 @@
 package fileserver
 
 import (
+	"flag"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -134,11 +135,21 @@ func uploadFile(c *gin.Context) {
 }
 
 func API(LanIp string) {
+	// Define command line flags
+	dev := flag.Bool("dev", false, "Run in development mode")
+	flag.Parse()
 
 	router := gin.Default()
 
-    // Use absolute path for templates and static files
-    webDir := "/usr/local/share/fileshear/web"
+	// Set web directory based on environment
+	var webDir string
+	if *dev {
+		webDir = "web" // Development path
+		gin.SetMode(gin.DebugMode)
+	} else {
+		webDir = "/usr/local/share/fileshear/web" // Production path
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	// Load HTML templates
 	router.LoadHTMLGlob(filepath.Join(webDir, "*.html"))
