@@ -127,6 +127,21 @@
                 viewButton.onclick = () => handleViewButton(item.name);
                 viewCell.appendChild(viewButton);
 
+                // download button
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = "download";
+                downloadButton.className = "download-button";
+                downloadButton.style.cursor = "pointer";
+                downloadButton.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = "/files/" + item.name;
+                    link.download = item.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                viewCell.appendChild(downloadButton);
+
                 row.appendChild(indexCell);
                 row.appendChild(nameCell);
                 row.appendChild(viewCell);
