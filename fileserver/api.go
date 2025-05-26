@@ -3,7 +3,6 @@ package fileserver
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -90,46 +89,47 @@ func getFileByName(c *gin.Context) {
 // upload file
 func uploadFile(c *gin.Context) {
 	currentDir := getCurrentDir()
-	// Set a reasonable max file size (e.g., 32 MB)
-	c.Request.ParseMultipartForm(32 << 20)
 
-	// Get the file from the form data
-	file, header, err := c.Request.FormFile("uploadFile")
+	// Parse multipart form with reasonable size limit
+	form, err := c.MultipartForm()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "No file uploaded",
+			"message": "Failed to parse form",
 			"error":   err.Error(),
 		})
 		return
 	}
-	defer file.Close()
 
-	// Ensure the files directory exists
-	// Create the destination file in current directory
-	dst := filepath.Join(currentDir, header.Filename)
-	out, err := os.Create(dst)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create file",
-			"error":   err.Error(),
+	// Get all files from form data
+	files := form.File["uploadFile[]"]
+	if len(files) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "No files uploaded",
 		})
 		return
 	}
-	defer out.Close()
 
-	// Copy the uploaded file to the destination file
-	_, err = io.Copy(out, file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to save file",
-			"error":   err.Error(),
-		})
-		return
+	uploadedFiles := []string{}
+
+	// Loop through each file and save it
+	for _, fileHeader := range files {
+		// Create the destination file
+		dst := filepath.Join(currentDir, fileHeader.Filename)
+
+		// save the file
+		if err := c.SaveUploadedFile(fileHeader, dst); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to save file: " + fileHeader.Filename,
+				"error":   err.Error(),
+			})
+			return
+		}
+		uploadedFiles = append(uploadedFiles, fileHeader.Filename)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":  "File uploaded successfully",
-		"filename": header.Filename,
+		"message": "File uploaded successfully",
+		"files":   uploadedFiles,
 	})
 
 }

@@ -11,7 +11,7 @@
         <div class="upload-form-container">
             <h2>File Upload</h2>
             <form id="uploadForm" enctype="multipart/form-data">
-                <input type="file" name="uploadFile">
+                <input type="file" name="uploadFile[]" multiple required>
                 <input type="submit" value="Upload">
             </form>
             <a href="/">go to home</a>
@@ -19,29 +19,36 @@
     </div>
 
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const formData = new FormData(this);
-            const file = formData.get('uploadFile');
+            const files = formData.getAll('uploadFile[]');
 
             // Create new FormData with the correct field name
             const uploadData = new FormData();
-            uploadData.append('uploadFile', file);
+            // Append each file individually
+            files.forEach(file => {
+                uploadData.append('uploadFile[]', file);
+            });
 
             fetch('/files', {
                 method: 'POST',
                 body: uploadData
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Upload successful:', data);
-                alert('File uploaded successfully!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Upload failed!');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Upload successful:', data);
+                    if (data.files && data.files.length > 0) {
+                        alert(`Successfully uploaded ${data.files.length} file(s):\n${data.files.join('\n')}`);
+                    } else {
+                        alert('Files uploaded successfully!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Upload failed!');
+                });
         });
     </script>
 
